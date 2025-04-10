@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aim Training Rhythm Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
+        
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a1a2e;
+            color: var(--light);
+            overflow: hidden;
+            user-select: none;
+        }
+        
+        .title-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #16213e 0%, #0f0c29 100%);
+        }
+        
+        .target {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent) 30%, transparent 70%);
+            box-shadow: 0 0 20px var(--accent);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: crosshair;
+            transform: scale(0);
+            transition: transform 0.1s ease-out;
+            animation: pulse 2s infinite;
+        }
+        
+        .target.active {
+            transform: scale(1);
+        }
+        
+        .target.hit {
+            transform: scale(1.2);
+            opacity: 0;
+            transition: all 0.2s ease-out;
+        }
+        
+        .target-inner {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--light);
+            box-shadow: 0 0 10px var(--light);
+        }
+        
+        .beat-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .beat-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 5px;
+            transition: width 0.05s linear;
+        }
+        
+        .beat-marker {
+            position: absolute;
+            bottom: 0;
+            width: 2px;
+            height: 20px;
+            background-color: white;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(253, 121, 168, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(253, 121, 168, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(253, 121, 168, 0); }
+        }
+        
+        .combo-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent);
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease-out;
+        }
+        
+        .combo-display.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .hit-effect {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: rgba(253, 121, 168, 0.3);
+            transform: scale(0);
+            pointer-events: none;
+        }
+        
+        .hit-effect.active {
+            animation: hitExpand 0.5s ease-out forwards;
+        }
+        
+        @keyframes hitExpand {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+        
+        .accuracy-display {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            font-size: 1rem;
+            color: var(--secondary);
+        }
+        
+        .menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(13, 17, 33, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: all 0.3s ease-out;
+        }
+        
+        .menu.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .difficulty-btn {
+            margin: 10px;
+            padding: 12px 24px;
+            border: 2px solid var(--primary);
+            border-radius: 30px;
+            background: transparent;
+            color: var(--light);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .difficulty-btn:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+        }
+        
+        .game-stats {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .perfect-hit {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        
+        .good-hit {
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+        }
+        
+        .ok-hit {
+            color: #ff9900;
+            text-shadow: 0 0 10px #ff9900;
+        }
+        
+        .miss {
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Targets will be generated here -->
+        
+        <div class="beat-indicator">
+            <div class="beat-progress"></div>
+            <!-- Beat markers will be added here -->
+        </div>
+        
+        <div class="combo-display">
+            <span class="combo-count">0</span> COMBO!
+        </div>
+        
+        <div class="accuracy-display">
+            Accuracy: <span class="accuracy-value">0</span>%
+        </div>
+        
+        <div class="game-stats">
+            <div>Score: <span class="score-value">0</span></div>
+            <div>Hits: <span class="hits-value">0</span></div>
+            <div>Misses: <span class="misses-value">0</span></div>
+        </div>
+        
+        <div class="menu">
+            <h1 class="title-font text-5xl mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                AIM RHYTHM TRAINER
+            </h1>
+            <p class="text-xl mb-12 text-gray-300 max-w-md text-center">
+                Test your aim and rhythm skills! Hit targets to the beat for maximum points.
+            </p>
+            <div class="flex flex-col items-center">
+                <h2 class="text-2xl mb-6 text-gray-300">Select Difficulty</h2>
+                <button class="difficulty-btn" data-difficulty="easy">
+                    <i class="fas fa-bolt mr-2"></i> Easy
+                </button>
+                <button class="difficulty-btn" data-difficulty="medium">
+                    <i class="fas fa-fire mr-2"></i> Medium
+                </button>
+                <button class="difficulty-btn" data-difficulty="hard">
+                    <i class="fas fa-skull mr-2"></i> Hard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game state
+            const state = {
+                difficulty: null,
+                isPlaying: false,
+                score: 0,
+                hits: 0,
+                misses: 0,
+                combo: 0,
+                maxCombo: 0,
+                accuracy: 0,
+                totalPossibleHits: 0,
+                totalHitTimeDiff: 0,
+                bpm: 120,
+                targetCount: 0,
+                targetLifetime: 1000,
+                beatInterval: null,
+                targetInterval: null,
+                gameDuration: 60000, // 1 minute
+                gameTimer: null,
+                activeTargets: [],
+                beatMarkers: [],
+                currentBeat: 0
+            };
+            
+            // DOM elements
+            const gameContainer = document.querySelector('.game-container');
+            const menu = document.querySelector('.menu');
+            const comboDisplay = document.querySelector('.combo-display');
+            const comboCount = document.querySelector('.combo-count');
+            const accuracyValue = document.querySelector('.accuracy-value');
+            const scoreValue = document.querySelector('.score-value');
+            const hitsValue = document.querySelector('.hits-value');
+            const missesValue = document.querySelector('.misses-value');
+            const beatProgress = document.querySelector('.beat-progress');
+            const beatIndicator = document.querySelector('.beat-indicator');
+            const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+            
+            // Initialize game
+            function initGame() {
+                resetGame();
+                createBeatMarkers();
+                startGame();
+            }
+            
+            // Reset game state
+            function resetGame() {
+                state.score = 0;
+                state.hits = 0;
+                state.misses = 0;
+                state.combo = 0;
+                state.maxCombo = 0;
+                state.accuracy = 0;
+                state.totalPossibleHits = 0;
+                state.totalHitTimeDiff = 0;
+                state.currentBeat = 0;
+                state.activeTargets = [];
+                
+                // Clear all targets
+                document.querySelectorAll('.target').forEach(target => target.remove());
+                document.querySelectorAll('.hit-effect').forEach(effect => effect.remove());
+                
+                // Update UI
+                updateStats();
+                comboDisplay.classList.remove('active');
+            }
+            
+            // Start the game
+            function startGame() {
+                state.isPlaying = true;
+                
+                // Calculate intervals based on BPM
+                const beatIntervalMs = 60000 / state.bpm;
+                const targetIntervalMs = beatIntervalMs * 2;
+                
+                // Start beat timer
+                state.beatInterval = setInterval(updateBeat, beatIntervalMs);
+                
+                // Start target spawner
+                state.targetInterval = setInterval(spawnTarget, targetIntervalMs);
+                
+                // Set game duration
+                state.gameTimer = setTimeout(endGame, state.gameDuration);
+                
+                // Hide menu
+                menu.classList.add('hidden');
+            }
+            
+            // End the game
+            function endGame() {
+                state.isPlaying = false;
+                
+                // Clear intervals
+                clearInterval(state.beatInterval);
+                clearInterval(state.targetInterval);
+                clearTimeout(state.gameTimer);
+                
+                // Remove all targets
+                state.activeTargets.forEach(target => {
+                    if (target.element && document.body.contains(target.element)) {
+                        target.element.remove();
+                    }
+                });
+                
+                state.activeTargets = [];
+                
+                // Show menu with results
+                menu.classList.remove('hidden');
+                menu.innerHTML = `
+                    <div class="text-center">
+                        <h1 class="title-font text-5xl mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                            GAME OVER
+                        </h1>
+                        <div class="text-2xl mb-6">
+                            <div>Final Score: <span class="text-purple-400">${state.score}</span></div>
+                            <div>Accuracy: <span class="text-pink-400">${Math.round(state.accuracy)}%</span></div>
+                            <div>Max Combo: <span class="text-yellow-400">${state.maxCombo}</span></div>
+                        </div>
+                        <div class="flex flex-col items-center mt-8">
+                            <h2 class="text-2xl mb-6 text-gray-300">Play Again</h2>
+                            <button class="difficulty-btn" data-difficulty="${state.difficulty}">
+                                <i class="fas fa-redo mr-2"></i> Same Difficulty
+                            </button>
+                            <button class="difficulty-btn" data-difficulty="menu">
+                                <i class="fas fa-home mr-2"></i> Change Difficulty
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Re-add event listeners to the new buttons
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', handleDifficultySelect);
+                });
+            }
+            
+            // Update beat progress
+            function updateBeat() {
+                state.currentBeat++;
+                
+                // Reset progress bar
+                beatProgress.style.width = '0%';
+                
+                // Animate progress
+                setTimeout(() => {
+                    beatProgress.style.width = '100%';
+                }, 10);
+                
+                // Highlight beat markers
+                updateBeatMarkers();
+            }
+            
+            // Create beat markers
+            function createBeatMarkers() {
+                // Clear existing markers
+                state.beatMarkers = [];
+                document.querySelectorAll('.beat-marker').forEach(marker => marker.remove());
+                
+                // Create new markers
+                const beatsPerMeasure = 4;
+                const markerWidth = beatIndicator.offsetWidth;
+                
+                for (let i = 0; i < beatsPerMeasure; i++) {
+                    const marker = document.createElement('div');
+                    marker.className = 'beat-marker';
+                    marker.style.left = `${(i / beatsPerMeasure) * 100}%`;
+                    beatIndicator.appendChild(marker);
+                    state.beatMarkers.push(marker);
+                }
+                
+                updateBeatMarkers();
+            }
+            
+            // Update beat markers
+            function updateBeatMarkers() {
+                state.beatMarkers.forEach((marker, index) => {
+                    if (index === state.currentBeat % 4) {
+                        marker.style.backgroundColor = 'var(--accent)';
+                        marker.style.height = '25px';
+                    } else {
+                        marker.style.backgroundColor = 'white';
+                        marker.style.height = '15px';
+                    }
+                });
+            }
+            
+            // Spawn a new target
+            function spawnTarget() {
+                if (!state.isPlaying) return;
+                
+                state.targetCount++;
+                state.totalPossibleHits++;
+                
+                const target = document.createElement('div');
+                target.className = 'target';
+                
+                const targetInner = document.createElement('div');
+                targetInner.className = 'target-inner';
+                target.appendChild(targetInner);
+                
+                // Random position (with padding from edges)
+                const padding = 100;
+                const x = padding + Math.random() * (gameContainer.offsetWidth - padding * 2);
+                const y = padding + Math.random() * (gameContainer.offsetHeight - padding * 2);
+                
+                target.style.left = `${x}px`;
+                target.style.top = `${y}px`;
+                
+                // Add to DOM
+                gameContainer.appendChild(target);
+                
+                // Force reflow to enable transition
+                void target.offsetWidth;
+                
+                // Activate target
+                target.classList.add('active');
+                
+                // Store target data
+                const targetData = {
+                    element: target,
+                    spawnTime: Date.now(),
+                    hit: false
+                };
+                
+                state.activeTargets.push(targetData);
+                
+                // Set timeout to remove target if not hit
+                targetData.timeout = setTimeout(() => {
+                    if (!targetData.hit) {
+                        missTarget(targetData);
+                    }
+                }, state.targetLifetime);
+                
+                // Add click event
+                target.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    hitTarget(targetData);
+                });
+            }
+            
+            // Handle target hit
+            function hitTarget(targetData) {
+                if (targetData.hit) return;
+                
+                targetData.hit = true;
+                clearTimeout(targetData.timeout);
+                
+                // Calculate timing accuracy
+                const now = Date.now();
+                const timeSinceSpawn = now - targetData.spawnTime;
+                const idealHitTime = state.targetLifetime / 2;
+                const timeDiff = Math.abs(timeSinceSpawn - idealHitTime);
+                
+                // Determine hit quality
+                let hitQuality, points, hitClass;
+                const accuracyPercentage = Math.max(0, 100 - (timeDiff / (state.targetLifetime / 2) * 100));
+                
+                if (timeDiff < 100) {
+                    hitQuality = 'PERFECT';
+                    points = 100;
+                    hitClass = 'perfect-hit';
+                } else if (timeDiff < 200) {
+                    hitQuality = 'GOOD';
+                    points = 50;
+                    hitClass = 'good-hit';
+                } else {
+                    hitQuality = 'OK';
+                    points = 20;
+                    hitClass = 'ok-hit';
+                }
+                
+                // Update stats
+                state.hits++;
+                state.combo++;
+                state.maxCombo = Math.max(state.maxCombo, state.combo);
+                state.score += points * (1 + state.combo * 0.1);
+                state.totalHitTimeDiff += timeDiff;
+                state.accuracy = ((state.hits / state.totalPossibleHits) * 100) - 
+                                (state.totalHitTimeDiff / (state.hits * state.targetLifetime / 2) * 50);
+                
+                // Create hit effect
+                createHitEffect(targetData.element, hitQuality, hitClass);
+                
+                // Remove target
+                targetData.element.classList.add('hit');
+                setTimeout(() => {
+                    targetData.element.remove();
+                    state.activeTargets = state.activeTargets.filter(t => t !== targetData);
+                }, 200);
+                
+                // Update UI
+                updateStats();
+                showCombo();
+            }
+            
+            // Handle target miss
+            function missTarget(targetData) {
+                if (targetData.hit) return;
+                
+                state.misses++;
+                state.combo = 0;
+                state.totalPossibleHits++;
+                state.accuracy = (state.hits / state.totalPossibleHits) * 100;
+                
+                // Remove target
+                targetData.element.remove();
+                state.activeTargets = state.activeTargets.filter(t => t !== targetData);
+                
+                // Create miss effect
+                createHitEffect(targetData.element, 'MISS', 'miss');
+                
+                // Update UI
+                updateStats();
+                comboDisplay.classList.remove('active');
+            }
+            
+            // Create hit effect
+            function createHitEffect(targetElement, text, className) {
+                const rect = targetElement.getBoundingClientRect();
+                const effect = document.createElement('div');
+                effect.className = `hit-effect ${className}`;
+                effect.style.left = `${rect.left + rect.width/2 - 50}px`;
+                effect.style.top = `${rect.top + rect.height/2 - 50}px`;
+                
+                const textElement = document.createElement('div');
+                textElement.className = 'absolute inset-0 flex items-center justify-center text-white font-bold';
+                textElement.textContent = text;
+                effect.appendChild(textElement);
+                
+                gameContainer.appendChild(effect);
+                
+                // Activate effect
+                setTimeout(() => {
+                    effect.classList.add('active');
+                }, 10);
+                
+                // Remove effect after animation
+                setTimeout(() => {
+                    effect.remove();
+                }, 500);
+            }
+            
+            // Show combo
+            function showCombo() {
+                comboCount.textContent = state.combo;
+                
+                // Reset animation
+                comboDisplay.classList.remove('active');
+                void comboDisplay.offsetWidth;
+                
+                // Activate
+                comboDisplay.classList.add('active');
+            }
+            
+            // Update stats display
+            function updateStats() {
+                scoreValue.textContent = Math.floor(state.score);
+                hitsValue.textContent = state.hits;
+                missesValue.textContent = state.misses;
+                accuracyValue.textContent = Math.round(Math.max(0, state.accuracy));
+            }
+            
+            // Handle difficulty selection
+            function handleDifficultySelect(e) {
+                const difficulty = e.currentTarget.dataset.difficulty;
+                
+                if (difficulty === 'menu') {
+                    // Return to main menu
+                    menu.innerHTML = `
+                        <h1 class="title-font text-5xl mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                            AIM RHYTHM TRAINER
+                        </h1>
+                        <p class="text-xl mb-12 text-gray-300 max-w-md text-center">
+                            Test your aim and rhythm skills! Hit targets to the beat for maximum points.
+                        </p>
+                        <div class="flex flex-col items-center">
+                            <h2 class="text-2xl mb-6 text-gray-300">Select Difficulty</h2>
+                            <button class="difficulty-btn" data-difficulty="easy">
+                                <i class="fas fa-bolt mr-2"></i> Easy
+                            </button>
+                            <button class="difficulty-btn" data-difficulty="medium">
+                                <i class="fas fa-fire mr-2"></i> Medium
+                            </button>
+                            <button class="difficulty-btn" data-difficulty="hard">
+                                <i class="fas fa-skull mr-2"></i> Hard
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Re-add event listeners
+                    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                        btn.addEventListener('click', handleDifficultySelect);
+                    });
+                    
+                    return;
+                }
+                
+                state.difficulty = difficulty;
+                
+                // Set game parameters based on difficulty
+                switch (difficulty) {
+                    case 'easy':
+                        state.bpm = 100;
+                        state.targetLifetime = 1500;
+                        state.gameDuration = 60000;
+                        break;
+                    case 'medium':
+                        state.bpm = 140;
+                        state.targetLifetime = 1000;
+                        state.gameDuration = 45000;
+                        break;
+                    case 'hard':
+                        state.bpm = 180;
+                        state.targetLifetime = 800;
+                        state.gameDuration = 30000;
+                        break;
+                }
+                
+                initGame();
+            }
+            
+            // Add event listeners
+            difficultyBtns.forEach(btn => {
+                btn.addEventListener('click', handleDifficultySelect);
+            });
+            
+            // Prevent clicking through targets
+            gameContainer.addEventListener('click', (e) => {
+                if (e.target === gameContainer && state.isPlaying) {
+                    // Count as miss if clicking outside targets
+                    state.misses++;
+                    state.combo = 0;
+                    state.totalPossibleHits++;
+                    state.accuracy = (state.hits / state.totalPossibleHits) * 100;
+                    
+                    updateStats();
+                    comboDisplay.classList.remove('active');
+                }
+            });
+            
+            // Initial setup
+            createBeatMarkers();
+        });
+    </script>
+</body>
+</html>
