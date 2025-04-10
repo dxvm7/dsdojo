@@ -398,33 +398,38 @@
         });
 
                 // Contact form submission
-  (function () {
-    emailjs.init("i0HhbzdfcQFPlFYS1"); // Your public key
-  })();
+                document.addEventListener("DOMContentLoaded", function () {
+    // Initialize EmailJS
+    emailjs.init("i0HhbzdfcQFPlFYS1");
 
-  document.getElementById('contact-form').addEventListener('submit', function (e) {
-    e.preventDefault();
+    // Contact form submission
+    const form = document.getElementById('contact-form');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
 
-    emailjs.sendForm('service_c52492f', '__ejs-test-mail-service__', this)
-      .then(function (response) {
-        alert('✅ Message sent successfully!');
-        document.getElementById('contact-form').reset(); // optional: clear form
-      }, function (error) {
-        alert('❌ Failed to send the message. Please try again.');
-        console.error('EmailJS error:', error);
-      });
-  });
-                // Show/hide back to top button based on scroll position
-                window.addEventListener('scroll', function() {
-            const backToTopBtn = document.querySelector('.floating-btn');
-            if (window.pageYOffset > 300) {
-                backToTopBtn.classList.remove('opacity-0', 'invisible');
-                backToTopBtn.classList.add('opacity-100', 'visible');
-            } else {
-                backToTopBtn.classList.remove('opacity-100', 'visible');
-                backToTopBtn.classList.add('opacity-0', 'invisible');
-            }
+      emailjs.sendForm('service_c52492f', '__ejs-test-mail-service__', this)
+        .then(function (response) {
+          alert('✅ Message sent successfully!');
+          form.reset();
+        }, function (error) {
+          alert('❌ Failed to send the message. Please try again.');
+          console.error('EmailJS error:', error);
         });
+    });
 
-        </script>
+    // Show/hide back to top button based on scroll position
+    window.addEventListener('scroll', function () {
+      const backToTopBtn = document.querySelector('.floating-btn');
+      if (!backToTopBtn) return; // failsafe if element not found
+
+      if (window.pageYOffset > 300) {
+        backToTopBtn.classList.remove('opacity-0', 'invisible');
+        backToTopBtn.classList.add('opacity-100', 'visible');
+      } else {
+        backToTopBtn.classList.remove('opacity-100', 'visible');
+        backToTopBtn.classList.add('opacity-0', 'invisible');
+      }
+    });
+  });
+  </script>
 </html>
