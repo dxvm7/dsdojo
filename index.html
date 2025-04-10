@@ -403,19 +403,21 @@
     emailjs.init("i0HhbzdfcQFPlFYS1");
 
     // Contact form submission
+    document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById('contact-form');
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
-      emailjs.sendForm('service_r93u8tt', '__ejs-test-mail-service__', this)
+      emailjs.sendForm('service_r93u8tt', 'template_uwlae5h', this)
         .then(function (response) {
           alert('✅ Message sent successfully!');
-          form.reset();
+          form.reset(); // Optional: reset form after successful submission
         }, function (error) {
           alert('❌ Failed to send the message. Please try again.');
           console.error('EmailJS error:', error);
         });
     });
+  });
 
     // Show/hide back to top button based on scroll position
     window.addEventListener('scroll', function () {
