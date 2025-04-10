@@ -399,18 +399,24 @@
 
                 // Contact form submission
                 document.addEventListener("DOMContentLoaded", function () {
+    // Initialize EmailJS with your public key
+    emailjs.init("i0HhbzdfcQFPlFYS1"); // Your public key
+
     const form = document.getElementById('contact-form');
     
-    // Make sure this code runs when the form is submitted
+    // Handle form submission
     form.addEventListener('submit', function (e) {
-      e.preventDefault(); // Prevent the default form submission
+      e.preventDefault(); // Prevent default form submission
 
-      // Check if emailjs.sendForm is available
+      // Check if emailjs is loaded
       if (typeof emailjs !== "undefined") {
+        console.log("Sending form via EmailJS");
+
+        // Send form data to EmailJS
         emailjs.sendForm('service_r93u8tt', 'template_uwlae5h', form)
           .then(function (response) {
             alert('✅ Message sent successfully!');
-            form.reset(); // Optional: reset form after successful submission
+            form.reset(); // Reset form after success
           }, function (error) {
             alert('❌ Failed to send the message. Please try again.');
             console.error('EmailJS error:', error);
@@ -420,7 +426,7 @@
       }
     });
   });
-
+  
     // Show/hide back to top button based on scroll position
     window.addEventListener('scroll', function () {
       const backToTopBtn = document.querySelector('.floating-btn');
@@ -436,5 +442,5 @@
     });
 
   </script>
-  
+
 </html>
