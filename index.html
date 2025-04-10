@@ -399,23 +399,25 @@
 
                 // Contact form submission
                 document.addEventListener("DOMContentLoaded", function () {
-    // Initialize EmailJS
-    emailjs.init("i0HhbzdfcQFPlFYS1");
-
-    // Contact form submission
-    document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById('contact-form');
+    
+    // Make sure this code runs when the form is submitted
     form.addEventListener('submit', function (e) {
-      e.preventDefault();
+      e.preventDefault(); // Prevent the default form submission
 
-      emailjs.sendForm('service_r93u8tt', 'template_uwlae5h', this)
-        .then(function (response) {
-          alert('✅ Message sent successfully!');
-          form.reset(); // Optional: reset form after successful submission
-        }, function (error) {
-          alert('❌ Failed to send the message. Please try again.');
-          console.error('EmailJS error:', error);
-        });
+      // Check if emailjs.sendForm is available
+      if (typeof emailjs !== "undefined") {
+        emailjs.sendForm('service_r93u8tt', 'template_uwlae5h', form)
+          .then(function (response) {
+            alert('✅ Message sent successfully!');
+            form.reset(); // Optional: reset form after successful submission
+          }, function (error) {
+            alert('❌ Failed to send the message. Please try again.');
+            console.error('EmailJS error:', error);
+          });
+      } else {
+        alert('❌ EmailJS is not available. Please check the JavaScript console for details.');
+      }
     });
   });
 
@@ -432,7 +434,7 @@
         backToTopBtn.classList.add('opacity-0', 'invisible');
       }
     });
-  });
-  </script>
 
+  </script>
+  
 </html>
